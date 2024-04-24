@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='register.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Register</h1>
+        {% if error %}
+        <p style="color: red;">{{ error }}</p>
+        {% endif %}
+        <form method="post">
+            <input type="text" id="fullname" name="fullname" required placeholder="Enter Full Name">
+            <br>
+            <input type="text" id="username" name="username" required placeholder="Enter username">
+            <br>
+            
+            <input type="password" id="password" name="password" required placeholder="Enter password">
+            <br>
+            <button type="submit">Register</button>
+        </form>
+        <p>Already have an account? <a href="{{ url_for('login') }}">Login</a></p>
+    </div>
+    
+</body>
+</html>

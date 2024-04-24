@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Movie Recommender</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
+</head>
+<body>
+    <nav>
+        <h1>Movie Recommender System</h1>
+        <div class="nav-links">
+            <p>Welcome, {{ user }}!</p>
+            <a href="{{ url_for('register') }}" class="register-btn">Register</a>
+            <a href="{{ url_for('login') }}" class="register-btn">Login</a>
+        </div>
+       
+       
+    </nav>
+
+
+    {% if search_history %}
+    <h2>Search History:</h2>
+    <div class="search-history">
+        {% for history in search_history %}
+        <div class="history-item">
+            <p>{{ history.movie_title }}</p>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+
+ 
+
+
+   <div class="search-bar">
+    <form method="post">
+        <label for="movie">Select a movie:</label>
+        <select id="movie" name="movie">
+            {% for movie in movies %}
+            <option value="{{ movie }}">{{ movie }}</option>
+            {% endfor %}
+        </select>
+        <br>
+        <button type="submit">Show Recommendation</button>
+    </form>
+   </div>
+    
+    {% if recommended_movies %}
+    <h2>Recommended Movies:</h2>
+    <div class="recommendations">
+        {% for movie_name, movie_poster in recommended_movies %}
+        <div class="recommendation">
+            <h3>{{ movie_name }}</h3>
+            <img src="{{ movie_poster }}" alt="{{ movie_name }} Poster">
+        </div>
+    
+        {% endfor %}
+    </div>
+   
+    {% endif %}
+
+    
+</body>
+</html>
+
+
+ 
+
+
+
+
+<!-- 
+  <!DOCTYPE html>
+<html>
+<head>
+    <title>Movie Recommender</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
+</head>
+<body>
+    <nav>
+        <h1>Movie Recommender System</h1>
+        <div class="nav-links">
+            <p>Welcome, {{ user }}!</p>
+            <a href="{{ url_for('register') }}" class="register-btn">Register</a>
+            <a href="{{ url_for('login') }}" class="register-btn">Login</a>
+        </div>
+    </nav>
+
+    {% if search_history %}
+    <h2>Search History:</h2>
+    <div class="search-history">
+        {% for history in search_history %}
+        <div class="search-item">
+            <h3>{{ history.movie_title }}</h3>
+               </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="search-bar">
+        <form method="post">
+            <label for="movie">Select a movie:</label>
+            <select id="movie" name="movie">
+                {% for movie in movies %}
+                <option value="{{ movie }}">{{ movie }}</option>
+                {% endfor %}
+            </select>
+            <br>
+            <button type="submit">Show Recommendation</button>
+        </form>
+    </div>
+
+    {% if recommended_movies %}
+    <h2>Recommended Movies:</h2>
+    <div class="recommendations">
+        {% for movie_name, movie_poster in recommended_movies %}
+        <div class="recommendation">
+            <h3>{{ movie_name }}</h3>
+            <img src="{{ movie_poster }}" alt="{{ movie_name }} Poster">
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</body>
+</html> -->
