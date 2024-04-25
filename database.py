@@ -55,7 +55,7 @@ class SearchHistory(Base):
     __tablename__ = 'search_history'
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey('users.id'))
-    movie_id = Column(Integer)
+    movie_id = Column(Integer) 
     movie_title = Column(String)
     user = relationship("User", back_populates="search_history")
 
