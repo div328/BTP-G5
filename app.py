@@ -96,7 +96,7 @@ def recommend(titles, cosine_sim):
             sim_scores.sort(key=lambda x: x[1], reverse=True)
 
             # Get the indices of the top 6 most similar movies (excluding the input movie itself)
-            movie_indices = [x[0] for x in sim_scores[1:15]]
+            movie_indices = [x[0] for x in sim_scores[1:20]]
 
             # Get the movie IDs, titles, and posters of the recommended movies
             recommended_movies = []
@@ -110,24 +110,41 @@ def recommend(titles, cosine_sim):
 
             all_recommended_movies.extend(recommended_movies)
             all_recommended_movie_posters.extend(recommended_movie_posters)
-            all_sim_scores.extend([score[1] for score in sim_scores[1:15]])
+            all_sim_scores.extend([score[1] for score in sim_scores[1:20]])
 
     # Sort the combined list of recommended movies based on similarity scores
     combined_recommendations = sorted(zip(all_recommended_movies, all_recommended_movie_posters, all_sim_scores), key=lambda x: x[2], reverse=True)
+     # Get the top 6-7 most similar movies
+    # top_movies = [rec[0] for rec in combined_recommendations[:11]]
+    # top_movie_posters = [rec[1] for rec in combined_recommendations[:11]]
 
-    # Get the top 6-7 most similar movies
-   # Shuffle the combined list
+    # return top_movies, top_movie_posters
+    
+
+    # Shuffle the combined list
+
+    random.shuffle(combined_recommendations)
+    # return top_movies, top_movie_posters
     random.shuffle(combined_recommendations)
 
-    # Get a random subset of 6-7 movies
-    num_recommendations = min(len(combined_recommendations), 10)
-    random_recommendations = random.sample(combined_recommendations, num_recommendations)
+    # Extract unique titles and poster URLs while maintaining alignment
+    unique_movies = []
+    unique_posters = []
+    seen_titles = set()
+    for rec in combined_recommendations:
+        movie_title, poster_url, _ = rec
+        if movie_title not in seen_titles:
+            seen_titles.add(movie_title)
+            unique_movies.append(movie_title)
+            unique_posters.append(poster_url)
 
-    # Extract titles and poster URLs
-    top_movies = [rec[0] for rec in random_recommendations]
-    top_movie_posters = [rec[1] for rec in random_recommendations]
+    # Randomly select a subset of unique recommendations
+    num_recommendations = min(len(unique_movies), 7)
+    random_indices = random.sample(range(len(unique_movies)), num_recommendations)
+    random_movies = [unique_movies[i] for i in random_indices]
+    random_posters = [unique_posters[i] for i in random_indices]
 
-    return top_movies, top_movie_posters
+    return random_movies, random_posters
 
 # def recommend(title, cosine_sim1):
 #     # Get the index of the movie that matches the title
@@ -219,17 +236,6 @@ def register():
 def home():
     if 'user' not in session:
         return redirect('/login')
-    
-    # Query the search history for the current user
-    engine = create_database()
-    Session = sessionmaker(bind=engine)
-    db_session = Session()
-    user = db_session.query(User).filter_by(username=session['user']).first()
-    titles=[]
-    search_histories = db_session.query(SearchHistory).filter_by(user_id=user.id).all()
-    if search_histories:
-            titles = [history.movie_title for history in search_histories]
-    db_session.close()
 
     if request.method == 'POST':
        
@@ -250,6 +256,19 @@ def home():
                 db_session.close()
         else:
             print(f"Movie '{selected_movie_name}' not found in the database.", file=sys.stdout)
+    
+    # Query the search history for the current user
+    engine = create_database()
+    Session = sessionmaker(bind=engine)
+    db_session = Session()
+    user = db_session.query(User).filter_by(username=session['user']).first()
+    titles=[]
+    search_histories = db_session.query(SearchHistory).filter_by(user_id=user.id).all()
+    if search_histories:
+            titles = [history.movie_title for history in search_histories]
+    db_session.close()
+
+
         
       
     # return render_template('index.html', movies=movies['title'].values, user=session['user'], search_history=search_histories)
