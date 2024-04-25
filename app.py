@@ -61,6 +61,7 @@ def recommendsearch(movie):
         })
     return recommended_movie_details
 
+
 def hybrid_recommendations(ratings, userId):
     all_movie_ids = []
     all_est_ratings = []
@@ -113,15 +114,33 @@ def hybrid_recommendations(ratings, userId):
     # Create the DataFrame with equal-length lists
     df = pd.DataFrame({'index': range(len(all_movie_titles)), 'title': all_movie_titles, 'movieId': all_movie_ids, 'estimated_rating': all_est_ratings}).set_index('index').sort_values(by='estimated_rating', ascending=False)
 
+    # Shuffle the DataFrame rows
+    df = df.sample(frac=1).reset_index(drop=True)
+
     recommended_movie_posters = []
     recommended_movies = []
+    seen_movies = set()
+    seen_posters = set()
 
-    # Iterate over the rows and extract movie IDs and titles
+    # Iterate over the shuffled rows and extract movie IDs and titles
     for index, row in df.iterrows():
         movie_id = row['movieId']
+        movie_title = row['title']
         poster_url = fetch_poster(movie_id)
+
+        # Skip movies and posters that have already been recommended
+        if movie_title in seen_movies or poster_url in seen_posters:
+            continue
+
+        seen_movies.add(movie_title)
+        seen_posters.add(poster_url)
+
         recommended_movie_posters.append(poster_url)
-        recommended_movies.append(row['title'])
+        recommended_movies.append(movie_title)
+
+        # Break the loop after 4-5 unique recommendations
+        if len(recommended_movies) >= 5:
+            break
 
     return recommended_movies, recommended_movie_posters
 
