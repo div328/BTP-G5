@@ -312,7 +312,7 @@ def search():
     if request.method == 'POST':
        
         selected_movie_name = request.form['movie']
-        movie_id = get_movie_id(selected_movie_name, movies)
+        movie_id = int(get_movie_id(selected_movie_name, movies))
         if session and 'user' in session and create_database and User and SearchHistory:
                 engine = create_database()
                 Session = sessionmaker(bind=engine)
