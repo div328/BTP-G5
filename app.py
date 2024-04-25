@@ -23,12 +23,6 @@ cosine_sim2 = pickle.load(open('similaritydiv1.pkl','rb'))
 # Create the SQLite database and tables
 create_database()
 
-# def get_movie_id(movie_title, movies):
-#     movie_row = movies.loc[movies['title'] == movie_title]
-#     if not movie_row.empty:
-#         return movie_row.iloc[0]['movie_id']
-#     else:
-#         return None
 
 def get_movie_id(movie_title, movies):
     movie_row = movies.loc[movies['title'] == movie_title]
@@ -49,34 +43,17 @@ def fetch_poster(movie_id):
 
 # Recommend movies
 
+def recommendsearch(movie):
+    movie_index = movies[movies['title'] == movie].index[0]
+    movie_list = sorted(list(enumerate(similarity[movie_index])), reverse=True, key=lambda x: x[1])[1:10]
+    recommended_movies = []
+    recommended_movie_posters = []
+    for i in movie_list[:8]:
+        movie_id = movies.iloc[i[0]].movie_id
+        recommended_movie_posters.append(fetch_poster(movie_id))
+        recommended_movies.append(movies.iloc[i[0]].title)
 
-# def recommend(movie):
-#     movie_index = movies[movies['title'] == movie].index[0]
-#     movie_list = sorted(list(enumerate(similarity[movie_index])), reverse=True, key=lambda x: x[1])[1:7]
-#     recommended_movies = []
-#     recommended_movie_posters = []
-#     for i in movie_list:
-#         movie_id = movies.iloc[i[0]].movie_id
-#         recommended_movie_posters.append(fetch_poster(movie_id))
-#         recommended_movies.append(movies.iloc[i[0]].title)
-
-#     # Save search history
-#     if 'user' in session:
-#         engine = create_database()
-#         Session = sessionmaker(bind=engine)
-#         db_session = Session()
-#         user = db_session.query(User).filter_by(username=session['user']).first()
-#         movie_id = int(get_movie_id(movie))
-#         if movie_id:
-#             print(f"Storing movie_id: {movie_id} for movie: {movie}", file=sys.stdout)
-#             search_history = SearchHistory(user_id=user.id, movie_id=movie_id, movie_title=movie)
-#             db_session.add(search_history)
-#             db_session.commit()
-#         else:
-#             print(f"Movie '{movie}' not found in the database.", file=sys.stdout)
-#         db_session.close()
-
-#     return recommended_movies, recommended_movie_posters
+    return recommended_movies, recommended_movie_posters
 
 def recommend(titles, cosine_sim):
     all_recommended_movies = []
@@ -96,7 +73,7 @@ def recommend(titles, cosine_sim):
             sim_scores.sort(key=lambda x: x[1], reverse=True)
 
             # Get the indices of the top 6 most similar movies (excluding the input movie itself)
-            movie_indices = [x[0] for x in sim_scores[1:20]]
+            movie_indices = [x[0] for x in sim_scores[1:10]]
 
             # Get the movie IDs, titles, and posters of the recommended movies
             recommended_movies = []
@@ -110,7 +87,7 @@ def recommend(titles, cosine_sim):
 
             all_recommended_movies.extend(recommended_movies)
             all_recommended_movie_posters.extend(recommended_movie_posters)
-            all_sim_scores.extend([score[1] for score in sim_scores[1:20]])
+            all_sim_scores.extend([score[1] for score in sim_scores[1:10]])
 
     # Sort the combined list of recommended movies based on similarity scores
     combined_recommendations = sorted(zip(all_recommended_movies, all_recommended_movie_posters, all_sim_scores), key=lambda x: x[2], reverse=True)
@@ -217,25 +194,10 @@ def register():
             return render_template('register.html', error=str(e))
     return render_template('register.html')
 
-# # Home route
-# @app.route('/', methods=['GET', 'POST'])
-# def home():
-#     if 'user' not in session:
-#         return redirect('/login')
-#     if request.method == 'POST':
-#         selected_movie_name = request.form['movie']
-#         recommended_movie_names, recommended_movie_posters = recommend(selected_movie_name)
-#         return render_template('index.html', movies=movies['title'].values, user=session['user'],
-#                                recommended_movies=zip(recommended_movie_names, recommended_movie_posters))
-#     return render_template('index.html', movies=movies['title'].values, user=session['user'])
-
-
-
-
-@app.route('/', methods=['GET', 'POST'])
-def home():
+@app.route('/search', methods=['GET', 'POST'])
+def search():
     if 'user' not in session:
-        return redirect('/login')
+         return redirect('/login')
 
     if request.method == 'POST':
        
@@ -256,7 +218,34 @@ def home():
                 db_session.close()
         else:
             print(f"Movie '{selected_movie_name}' not found in the database.", file=sys.stdout)
-    
+        
+        selected_movie_name = request.form['movie']
+        recommended_movie_names, recommended_movie_posters = recommendsearch(selected_movie_name)
+        return render_template('search.html', movies=movies['title'].values, user=session['user'],
+                               recommended_movies=zip(recommended_movie_names, recommended_movie_posters))
+        
+    return render_template('search.html', movies=movies['title'].values, user=session['user'])
+        
+
+# # Home route
+# @app.route('/', methods=['GET', 'POST'])
+# def home():
+#     if 'user' not in session:
+#         return redirect('/login')
+#     if request.method == 'POST':
+#         selected_movie_name = request.form['movie']
+#         recommended_movie_names, recommended_movie_posters = recommend(selected_movie_name)
+#         return render_template('index.html', movies=movies['title'].values, user=session['user'],
+#                                recommended_movies=zip(recommended_movie_names, recommended_movie_posters))
+#     return render_template('index.html', movies=movies['title'].values, user=session['user'])
+
+
+
+
+@app.route('/', methods=['GET', 'POST'])
+def home():
+    if 'user' not in session:
+        return redirect('/login')
     # Query the search history for the current user
     engine = create_database()
     Session = sessionmaker(bind=engine)

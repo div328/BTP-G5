@@ -11,9 +11,9 @@
             <p>Welcome, {{ user }}!</p>
             <a href="{{ url_for('register') }}" class="register-btn">Register</a>
             <a href="{{ url_for('login') }}" class="register-btn">Login</a>
+            <!-- Add the search button link below -->
+            <a href="{{ url_for('search') }}" class="search-btn">Search</a>
         </div>
-       
-       
     </nav>
 
 
@@ -32,19 +32,6 @@
  
 
 
-   <div class="search-bar">
-    <form method="post">
-        <label for="movie">Select a movie:</label>
-        <select id="movie" name="movie">
-            {% for movie in movies %}
-            <option value="{{ movie }}">{{ movie }}</option>
-            {% endfor %}
-        </select>
-        <br>
-        <button type="submit">Show Recommendation</button>
-    </form>
-   </div>
-    
     {% if recommended_movies %}
     <h2>Recommended Movies:</h2>
     <div class="recommendations">
